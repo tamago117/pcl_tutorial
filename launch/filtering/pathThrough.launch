@@ -1,0 +1,37 @@
+<launch>
+  <arg name="realsense" default="false" />
+  <arg name="gazebo" default="false" />
+  <arg name="use_file" default="false" />
+  <arg name="file" default="" />
+
+  <group if="$(arg realsense)">
+    <include file="$(find pcl_tutorial)/launch/realsense.launch" />
+  </group>
+
+  <group if="$(arg gazebo)">
+    <include file="$(find pcl_tutorial)/launch/gazebo.launch" />
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster"
+      args="0 0 0 -1.570796 0 -1.570796 camera_link camera_depth_optical_frame " />
+  </group>
+
+  <group if="$(arg use_file)">
+    <arg name="file_name" value="$(find pcl_tutorial)/resources/$(arg file)"/>
+    <arg name="rate" value="0.1"/>
+
+    <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pcd_to_pointcloud" args="$(arg file_name) $(arg rate)" output="screen">
+      <remap from="cloud_pcd" to="/camera/depth_registered/points"/>
+      <param name="frame_id" value="camera_depth_optical_frame" />
+    </node>
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" 
+      args="0 0 0 -1.570796 0 -1.570796 camera_link camera_depth_optical_frame " />
+  </group>
+
+  <node name="pathThrough" pkg="pcl_tutorial" type="pathThrough" output="screen">
+    <rosparam command="load" file="$(find pcl_tutorial)/config/pathThrough.yaml" />
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" respawn="false"
+    args="-d $(find pcl_tutorial)/rviz/config.rviz" output="screen" />
+</launch>
