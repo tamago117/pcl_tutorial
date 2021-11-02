@@ -1,0 +1,4 @@
+output_frame : output
+source_frame : camera_depth_optical_frame
+cloud_quantity : 50
+standart_deviation : 1.0

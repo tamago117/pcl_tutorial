@@ -139,6 +139,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/pcl_tutorial_node.cpp)
 add_executable(pathThrough src/filtering/pathThrough.cpp)
 add_executable(downSampling src/filtering/downSampling.cpp)
+add_executable(removeOutlier src/filtering/removeOutlier.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -158,6 +159,9 @@ target_link_libraries(pathThrough
   ${catkin_LIBRARIES}
 )
 target_link_libraries(downSampling
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(removeOutlier
   ${catkin_LIBRARIES}
 )
 

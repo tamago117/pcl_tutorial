@@ -2,7 +2,7 @@
   <arg name="realsense" default="false" />
   <arg name="gazebo" default="false" />
   <arg name="use_file" default="false" />
-  <arg name="file" default="" />
+  <arg name="file" default="table_scene_lms400.pcd" />
 
   <group if="$(arg realsense)">
     <include file="$(find pcl_tutorial)/launch/realsense.launch" />

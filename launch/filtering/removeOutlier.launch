@@ -28,8 +28,8 @@
       args="0 0 0 -1.570796 0 -1.570796 camera_link camera_depth_optical_frame " />
   </group>
 
-  <node name="downSampling" pkg="pcl_tutorial" type="downSampling" output="screen">
-    <rosparam command="load" file="$(find pcl_tutorial)/config/downSampling.yaml" />
+  <node name="removeOutlier" pkg="pcl_tutorial" type="removeOutlier" output="screen">
+    <rosparam command="load" file="$(find pcl_tutorial)/config/removeOutlier.yaml" />
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"
