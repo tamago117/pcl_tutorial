@@ -1,0 +1,5 @@
+output_frame : output
+source_frame : camera_depth_optical_frame
+voxel_xsize : 0.05
+voxel_ysize : 0.05
+voxel_zsize : 0.05

@@ -10,10 +10,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/filter.h>
-#include <pcl/filters/passthrough.h>
+#include <pcl/filters/voxel_grid.h>
 
 
-class pathThrough
+class downSampling
 {
 private:
     ros::NodeHandle nh;
@@ -24,61 +24,36 @@ private:
     ros::Subscriber cloud_sub;
 
     //function
-    void axis_pathThrough(pcl::PCLPointCloud2Ptr cloud, std::string axis, double min, double max);
+    void axis_downSampling(pcl::PCLPointCloud2Ptr cloud, std::string axis, double min, double max);
     void tf_broadcast();
     void cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message);
 
     std::string output_frame;
     std::string source_frame;
 
-    bool set_xfilter;
-    bool set_yfilter;
-    bool set_zfilter;
-
-    double filter_xmin;
-    double filter_xmax;
-    double filter_ymin;
-    double filter_ymax;
-    double filter_zmin;
-    double filter_zmax;
-
+    double voxel_xsize;
+    double voxel_ysize;
+    double voxel_zsize;
 
 public:
-    pathThrough();
+    downSampling();
 };
 
-pathThrough::pathThrough()
+downSampling::downSampling()
 {
     cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/output", 1);
-    cloud_sub = nh.subscribe("/camera/depth_registered/points", 1, &pathThrough::cloud_callback, this);
+    cloud_sub = nh.subscribe("/camera/depth_registered/points", 1, &downSampling::cloud_callback, this);
 
     ros::NodeHandle pnh("~");
     pnh.param<std::string>("output_frame", output_frame, "output");
     pnh.param<std::string>("source_frame", source_frame, "camera_depth_optical_frame");
 
-    pnh.param<bool>("set_xfilter", set_xfilter, "false");
-    pnh.param<bool>("set_yfilter", set_yfilter, "false");
-    pnh.param<bool>("set_zfilter", set_zfilter, "false");
-
-    pnh.param<double>("filter_xmin", filter_xmin, -5.0);
-    pnh.param<double>("filter_xmax", filter_xmax, 5.0);
-    pnh.param<double>("filter_ymin", filter_ymin, -5.0);
-    pnh.param<double>("filter_ymax", filter_ymax, 5.0);
-    pnh.param<double>("filter_zmin", filter_zmin, 0.0);
-    pnh.param<double>("filter_zmax", filter_zmax, 2.0);
+    pnh.param<double>("voxel_xsize", voxel_xsize, 0.1);
+    pnh.param<double>("voxel_ysize", voxel_ysize, 0.1);
+    pnh.param<double>("voxel_zsize", voxel_zsize, 0.1);
 }
 
-void pathThrough::axis_pathThrough(pcl::PCLPointCloud2Ptr cloud, std::string axis, double min, double max)
-{
-    //filter
-    pcl::PassThrough<pcl::PCLPointCloud2> pass;
-    pass.setInputCloud(cloud);
-    pass.setFilterFieldName(axis);
-    pass.setFilterLimits(min, max);
-    pass.filter(*cloud);
-}
-
-void pathThrough::tf_broadcast()
+void downSampling::tf_broadcast()
 {
     geometry_msgs::TransformStamped transformStamped;
     transformStamped.child_frame_id = output_frame;
@@ -99,7 +74,7 @@ void pathThrough::tf_broadcast()
 
 }
 
-void pathThrough::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message)
+void downSampling::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message)
 {
     //path through
     //https://pcl.readthedocs.io/projects/tutorials/en/latest/passthrough.html#passthrough
@@ -110,15 +85,11 @@ void pathThrough::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_m
     // Convert to PCL data type
     pcl_conversions::toPCL(*cloud_message, *cloud);
 
-    if(set_xfilter){
-        axis_pathThrough(cloudPtr, "x", filter_xmin, filter_xmax);
-    }
-    if(set_yfilter){
-        axis_pathThrough(cloudPtr, "y", filter_ymin, filter_ymax);
-    }
-    if(set_zfilter){
-        axis_pathThrough(cloudPtr, "z", filter_zmin, filter_zmax);
-    }
+    //down sampling
+    pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+    sor.setInputCloud(cloudPtr);
+    sor.setLeafSize(voxel_xsize, voxel_ysize, voxel_zsize);
+    sor.filter(*cloudPtr);
 
     //convert PCLPointCloud2 to PointCloud2(ROS type)
     sensor_msgs::PointCloud2 output;
@@ -132,7 +103,7 @@ void pathThrough::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_m
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "pathThrough");
-    pathThrough path_through;
+    ros::init(argc, argv, "downSampling");
+    downSampling down_sampling;
     ros::spin();
 }

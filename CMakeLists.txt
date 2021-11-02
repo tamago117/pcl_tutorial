@@ -138,6 +138,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pcl_tutorial_node.cpp)
 add_executable(pathThrough src/filtering/pathThrough.cpp)
+add_executable(downSampling src/filtering/downSampling.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -154,6 +155,9 @@ add_executable(pathThrough src/filtering/pathThrough.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(pathThrough
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(downSampling
   ${catkin_LIBRARIES}
 )
 
