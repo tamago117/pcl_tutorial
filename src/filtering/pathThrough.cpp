@@ -24,6 +24,7 @@ private:
     ros::Subscriber cloud_sub;
 
     //function
+    void axis_pathThrough(pcl::PCLPointCloud2Ptr cloud, std::string axis, double min, double max);
     void tf_broadcast();
     void cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message);
 
@@ -67,6 +68,16 @@ pathThrough::pathThrough()
     pnh.param<double>("filter_zmax", filter_zmax, 2.0);
 }
 
+void pathThrough::axis_pathThrough(pcl::PCLPointCloud2Ptr cloud, std::string axis, double min, double max)
+{
+    //filter
+    pcl::PassThrough<pcl::PCLPointCloud2> pass;
+    pass.setInputCloud(cloud);
+    pass.setFilterFieldName(axis);
+    pass.setFilterLimits(min, max);
+    pass.filter(*cloud);
+}
+
 void pathThrough::tf_broadcast()
 {
     geometry_msgs::TransformStamped transformStamped;
@@ -95,21 +106,33 @@ void pathThrough::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_m
 
     //convert PointCloud2(ROS type) to PCLPointCloud2
     pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
-    pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+    //pcl::PCLPointCloud2ConstPtr cloudPtr(cloud);
+    pcl::PCLPointCloud2Ptr cloudPtr(cloud);
     pcl::PCLPointCloud2 cloud_filtered;
     // Convert to PCL data type
     pcl_conversions::toPCL(*cloud_message, *cloud);
 
     //filter
-    pcl::PassThrough<pcl::PCLPointCloud2> pass;
+    /*pcl::PassThrough<pcl::PCLPointCloud2> pass;
     pass.setInputCloud(cloudPtr);
     pass.setFilterFieldName("z");
     pass.setFilterLimits(filter_zmin, filter_zmax);
-    pass.filter(cloud_filtered);
+    pass.filter(cloud_filtered);*/
+
+    if(set_xfilter){
+        axis_pathThrough(cloudPtr, "x", filter_xmin, filter_xmax);
+    }
+    if(set_yfilter){
+        axis_pathThrough(cloudPtr, "y", filter_ymin, filter_ymax);
+    }
+    if(set_zfilter){
+        axis_pathThrough(cloudPtr, "z", filter_zmin, filter_zmax);
+    }
 
     //convert PCLPointCloud2 to PointCloud2(ROS type)
     sensor_msgs::PointCloud2 output;
-    pcl_conversions::moveFromPCL(cloud_filtered, output);
+    //pcl_conversions::moveFromPCL(cloud_filtered, output);
+    pcl_conversions::moveFromPCL(*cloudPtr, output);
     output.header.frame_id = output_frame;
     cloud_pub.publish(output);
 

@@ -1,10 +1,10 @@
 output_frame : output
 source_frame : camera_depth_optical_frame
-set_xfilter : false
+set_xfilter : true
 set_yfilter : false
-set_zfilter : false
+set_zfilter : true
 filter_xmin : -5.0
-filter_xmax : 5.0
+filter_xmax : 0
 filter_ymin : -5.0
 filter_ymax : 5.0
 filter_zmin : 0.3
