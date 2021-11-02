@@ -10,10 +10,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/filter.h>
-#include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/project_inliers.h>
 
 
-class downSampling
+class projectInlier
 {
 private:
     ros::NodeHandle nh;
@@ -30,29 +30,31 @@ private:
     std::string output_frame;
     std::string source_frame;
 
-    double voxel_xsize;
-    double voxel_ysize;
-    double voxel_zsize;
+    double coefficient_a;
+    double coefficient_b;
+    double coefficient_c;
+    double coefficient_d;
 
 public:
-    downSampling();
+    projectInlier();
 };
 
-downSampling::downSampling()
+projectInlier::projectInlier()
 {
     cloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/output", 1);
-    cloud_sub = nh.subscribe("/camera/depth_registered/points", 1, &downSampling::cloud_callback, this);
+    cloud_sub = nh.subscribe("/camera/depth_registered/points", 1, &projectInlier::cloud_callback, this);
 
     ros::NodeHandle pnh("~");
     pnh.param<std::string>("output_frame", output_frame, "output");
     pnh.param<std::string>("source_frame", source_frame, "camera_depth_optical_frame");
 
-    pnh.param<double>("voxel_xsize", voxel_xsize, 0.1);
-    pnh.param<double>("voxel_ysize", voxel_ysize, 0.1);
-    pnh.param<double>("voxel_zsize", voxel_zsize, 0.1);
+    pnh.param<double>("coefficient_a", coefficient_a, 0.0);
+    pnh.param<double>("coefficient_b", coefficient_b, 0.0);
+    pnh.param<double>("coefficient_c", coefficient_c, 1.0);
+    pnh.param<double>("coefficient_d", coefficient_d, 0.0);
 }
 
-void downSampling::tf_broadcast()
+void projectInlier::tf_broadcast()
 {
     geometry_msgs::TransformStamped transformStamped;
     transformStamped.child_frame_id = output_frame;
@@ -73,7 +75,7 @@ void downSampling::tf_broadcast()
 
 }
 
-void downSampling::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message)
+void projectInlier::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message)
 {
 
     //convert PointCloud2(ROS type) to PCLPointCloud2
@@ -82,15 +84,26 @@ void downSampling::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_
     // Convert to PCL data type
     pcl_conversions::toPCL(*cloud_message, *cloud);
 
-    //down sampling
-    pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-    sor.setInputCloud(cloudPtr);
-    sor.setLeafSize(voxel_xsize, voxel_ysize, voxel_zsize);
-    sor.filter(*cloudPtr);
+    //set coefficients
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
+    //ax + by + cz + d = 0 (surface equation)
+    coefficients->values.resize(4);
+    coefficients->values[0] = coefficient_a;
+    coefficients->values[1] = coefficient_b;
+    coefficients->values[2] = coefficient_c;
+    coefficients->values[3] = coefficient_d;
+
+    //project surface
+    pcl::PCLPointCloud2 cloud_projected;
+    pcl::ProjectInliers<pcl::PCLPointCloud2> proj;
+    proj.setModelType(pcl::SACMODEL_PLANE);
+    proj.setInputCloud(cloudPtr);
+    proj.setModelCoefficients(coefficients);
+    proj.filter(cloud_projected);
 
     //convert PCLPointCloud2 to PointCloud2(ROS type)
     sensor_msgs::PointCloud2 output;
-    pcl_conversions::moveFromPCL(*cloudPtr, output);
+    pcl_conversions::moveFromPCL(cloud_projected, output);
     output.header.frame_id = output_frame;
     cloud_pub.publish(output);
 
@@ -100,7 +113,7 @@ void downSampling::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "downSampling");
-    downSampling down_sampling;
+    ros::init(argc, argv, "projectInlier");
+    projectInlier project_inlier;
     ros::spin();
 }

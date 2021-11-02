@@ -140,6 +140,7 @@ include_directories(
 add_executable(pathThrough src/filtering/pathThrough.cpp)
 add_executable(downSampling src/filtering/downSampling.cpp)
 add_executable(removeOutlier src/filtering/removeOutlier.cpp)
+add_executable(projectInliers src/filtering/projectInliers.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,6 +163,9 @@ target_link_libraries(downSampling
   ${catkin_LIBRARIES}
 )
 target_link_libraries(removeOutlier
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(projectInliers
   ${catkin_LIBRARIES}
 )
 

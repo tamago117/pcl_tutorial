@@ -24,12 +24,12 @@
       <param name="frame_id" value="camera_depth_optical_frame" />
     </node>
 
-    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster" 
+    <node pkg="tf2_ros" type="static_transform_publisher" name="camera_link_broadcaster"
       args="0 0 0 -1.570796 0 -1.570796 camera_link camera_depth_optical_frame " />
   </group>
 
-  <node name="downSampling" pkg="pcl_tutorial" type="downSampling" output="screen">
-    <rosparam command="load" file="$(find pcl_tutorial)/config/filtering/downSampling.yaml" />
+  <node name="projectInliers" pkg="pcl_tutorial" type="projectInliers" output="screen">
+    <rosparam command="load" file="$(find pcl_tutorial)/config/filtering/projectInliers.yaml" />
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"

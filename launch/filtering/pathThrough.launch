@@ -29,7 +29,7 @@
   </group>
 
   <node name="pathThrough" pkg="pcl_tutorial" type="pathThrough" output="screen">
-    <rosparam command="load" file="$(find pcl_tutorial)/config/pathThrough.yaml" />
+    <rosparam command="load" file="$(find pcl_tutorial)/config/filtering/pathThrough.yaml" />
   </node>
 
   <node name="rviz" pkg="rviz" type="rviz" respawn="false"

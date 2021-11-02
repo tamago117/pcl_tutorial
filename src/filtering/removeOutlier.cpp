@@ -73,8 +73,6 @@ void removeOutlier::tf_broadcast()
 
 void removeOutlier::cloud_callback(const sensor_msgs::PointCloud2ConstPtr& cloud_message)
 {
-    //path through
-    //https://pcl.readthedocs.io/projects/tutorials/en/latest/passthrough.html#passthrough
 
     //convert PointCloud2(ROS type) to PCLPointCloud2
     pcl::PCLPointCloud2* cloud = new pcl::PCLPointCloud2;
