@@ -1,0 +1,8 @@
+output_frame : output
+source_frame : camera_depth_optical_frame
+voxel_xsize : 0.02
+voxel_ysize : 0.02
+voxel_zsize : 0.02
+maxIteration : 1000
+distanceThreshold : 0.5
+extractRate : 0.01

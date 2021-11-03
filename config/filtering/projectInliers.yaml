@@ -1,5 +1,6 @@
 output_frame : output
 source_frame : camera_depth_optical_frame
+#ax + by + cz + d = 0
 coefficient_a : 0.0
 coefficient_b : 0.0
 coefficient_c : 1.0
