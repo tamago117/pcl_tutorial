@@ -1,0 +1,12 @@
+output_frame : output
+source_frame : camera_depth_optical_frame
+
+searchPoint_x : 0.0
+searchPoint_y : 0.0
+searchPoint_z : 0.5
+
+search_method : radius #neighbor or radius
+
+neighbor_number : 1000
+radius : 0.1
+max_nn : 1000

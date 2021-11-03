@@ -142,6 +142,7 @@ add_executable(downSampling src/filtering/downSampling.cpp)
 add_executable(removeOutlier src/filtering/removeOutlier.cpp)
 add_executable(projectInliers src/filtering/projectInliers.cpp)
 add_executable(extractIndices src/filtering/extractIndices.cpp)
+add_executable(kdtree src/kdtree/kdtree.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -170,6 +171,9 @@ target_link_libraries(projectInliers
   ${catkin_LIBRARIES}
 )
 target_link_libraries(extractIndices
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(kdtree
   ${catkin_LIBRARIES}
 )
 
